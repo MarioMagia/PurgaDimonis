@@ -1,7 +1,11 @@
 package gdx.game.objects;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
@@ -12,6 +16,7 @@ import gdx.game.utils.Settings;
 
 public class Player extends Actor {
 
+    private float stateTime;
     private Vector2 position;
     private int width, height;
 
@@ -33,7 +38,7 @@ public class Player extends Actor {
         collisionRect = new Rectangle();
         setBounds(position.x, position.y, width, height);
         setTouchable(Touchable.enabled);
-
+        stateTime = 0f;
     }
 
     @Override
@@ -61,8 +66,15 @@ public class Player extends Actor {
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
-        batch.draw(AssetManager.player, position.x-(Settings.PLAYER_CANVAS_WIDTH*scale/2) + (width/2), position.y,
+        stateTime += Gdx.graphics.getDeltaTime();
+        batch.draw((TextureRegion)AssetManager.running.getKeyFrame(stateTime, true), position.x-(Settings.PLAYER_CANVAS_WIDTH*scale/2) + (width/2), position.y,
             Settings.PLAYER_CANVAS_WIDTH*scale, Settings.PLAYER_CANVAS_HEIGHT*scale);
+        /*ShapeRenderer sr = new ShapeRenderer();
+        sr.setProjectionMatrix(batch.getProjectionMatrix());
+        sr.begin(ShapeRenderer.ShapeType.Line);
+        sr.setColor(Color.GREEN);
+        sr.rect(position.x-(Settings.PLAYER_CANVAS_WIDTH*scale/2) + (width/2),position.y,Settings.PLAYER_CANVAS_WIDTH*scale,Settings.PLAYER_CANVAS_HEIGHT*scale);
+        sr.end();*/
     }
 
 

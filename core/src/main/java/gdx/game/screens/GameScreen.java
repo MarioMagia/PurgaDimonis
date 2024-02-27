@@ -30,7 +30,7 @@ public class GameScreen implements Screen {
         batch = stage.getBatch();
         sh = new ScrollHandler();
         stage.addActor(sh);
-        player = new Player(160,160,3);
+        player = new Player( Settings.PLAYER_STARTX,Settings.PLAYER_STARTY,4);
         stage.addActor(player);
 
     }
@@ -44,7 +44,7 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0, 0, 0, 1);
         stage.draw();
         stage.act(delta);
-        //drawElements();
+        drawElements();
     }
 
     private void drawElements(){
