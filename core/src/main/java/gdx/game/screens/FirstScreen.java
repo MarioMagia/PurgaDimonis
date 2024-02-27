@@ -8,6 +8,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.RunnableAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
@@ -17,6 +18,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import gdx.game.ScreenManager;
+import gdx.game.utils.Settings;
+
 /** First screen of the application. Displayed after the application is created. */
 public class FirstScreen implements Screen {
 
@@ -25,7 +29,7 @@ public class FirstScreen implements Screen {
 
     @Override
     public void show() {
-        stage = new Stage(new FitViewport(1280, 960));
+        stage = new Stage(new FitViewport(Settings.GAME_WIDTH, Settings.GAME_HEIGHT));
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
 
         Table root = new Table();
@@ -45,7 +49,15 @@ public class FirstScreen implements Screen {
         button.addListener(new ChangeListener() {
             @Override
             public void changed(final ChangeEvent event, final Actor actor) {
-                button.setText("Clicked.");
+
+                RunnableAction run = new RunnableAction();
+                run.setRunnable(new Runnable() {
+                    @Override
+                    public void run() {
+                        ScreenManager.setScreen(new GameScreen());
+                    }
+                });
+                window.addAction(Actions.sequence(Actions.alpha(1f), Actions.fadeOut(1f),run));
             }
         });
         window.add(button).row();
