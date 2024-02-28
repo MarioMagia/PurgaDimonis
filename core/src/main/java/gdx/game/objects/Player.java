@@ -54,7 +54,7 @@ public class Player extends Actor {
         bodyDef.position.set(position.x+(width/2),position.y+(height/2));
         fixtureDef = new FixtureDef();
         fixtureDef.shape = shape;
-        fixtureDef.density = 90;
+        fixtureDef.density = 1;
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
     }
@@ -63,21 +63,6 @@ public class Player extends Actor {
     public void act(float delta) {
         super.act(delta);
 
-        // Movem l'spacecraft depenent de la direcció controlant que no surti de la pantalla
-        switch (direction) {
-            case PLAYER_LEFT:
-                if (this.position.x - Settings.PLAYER_VELOCITY * delta >= 0) {
-                    this.position.x -= Settings.PLAYER_VELOCITY * delta;
-                }
-                break;
-            case PLAYER_RIGHT:
-                if (this.position.x + height + Settings.PLAYER_VELOCITY * delta <= Settings.GAME_WIDTH) {
-                    this.position.x += Settings.PLAYER_VELOCITY * delta;
-                }
-                break;
-            case PLAYER_STRAIGHT:
-                break;
-        }
         collisionRect.set(position.x, position.y, width, 64);
         setBounds(position.x, position.y, width, height);
     }
@@ -101,19 +86,6 @@ public class Player extends Actor {
         return collisionRect;
     }
 
-    public void goLeft() {
-        direction = PLAYER_LEFT;
-    }
-
-    // Canviem la direcció de l'Spacecraft: Baixa
-    public void goRight() {
-        direction = PLAYER_RIGHT;
-    }
-
-    // Posem l'Spacecraft al seu estat original
-    public void goStraight() {
-        direction = PLAYER_STRAIGHT;
-    }
 
     public BodyDef getBodyDef() {
         return bodyDef;

@@ -1,6 +1,7 @@
 package gdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -20,6 +21,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import gdx.game.helpers.InputHandler;
 import gdx.game.objects.Player;
 import gdx.game.objects.ScrollHandler;
 import gdx.game.utils.Settings;
@@ -34,6 +36,7 @@ public class GameScreen implements Screen {
     private Box2DDebugRenderer debugRenderer;
     private ShapeRenderer shapeRenderer;
     private Batch batch;
+    private InputHandler inputHandler;
     public GameScreen(){
         Box2D.init();
         camera = new OrthographicCamera(Settings.GAME_WIDTH, Settings.GAME_HEIGHT);
@@ -46,12 +49,14 @@ public class GameScreen implements Screen {
         stage.addActor(sh);
         player = new Player( Settings.PLAYER_STARTX,Settings.PLAYER_STARTY+200,4);
         stage.addActor(player);
-
+        inputHandler = new InputHandler(this);
+        Gdx.input.setInputProcessor(inputHandler);
         createWorld();
+
     }
 
     private void createWorld() {
-        world = new World(new Vector2(0, -100), true);
+        world = new World(new Vector2(0, -900), false);
         debugRenderer = new Box2DDebugRenderer();
 
         //Ground
@@ -74,6 +79,7 @@ public class GameScreen implements Screen {
         playerbody = world.createBody(player.getBodyDef());
         // Create our fixture and attach it to the body
         Fixture fixture = playerbody.createFixture(player.getFixtureDef());
+        inputHandler.updatePlayerBody(playerbody);
     }
 
     @Override
@@ -86,12 +92,22 @@ public class GameScreen implements Screen {
         ScreenUtils.clear(0, 0, 0, 1);
         stage.draw();
         stage.act(delta);
-        world.step(1/60f, 6, 2);
-        Gdx.app.log("position",playerbody.getPosition()+"");
-        player.setPosition(playerbody.getPosition(),true);
-
-
+        doPhysicsStep(delta);
+        Vector2 position = playerbody.getPosition();
+        player.setPosition(position,true);
         //drawElements();
+    }
+    private float accumulator = 0;
+
+    private void doPhysicsStep(float deltaTime) {
+        // fixed time step
+        // max frame time to avoid spiral of death (on slow devices)
+        float frameTime = Math.min(deltaTime, 0.25f);
+        accumulator += frameTime;
+        while (accumulator >= 1/240f) {
+            world.step(1/240f, 60, 2);
+            accumulator -= 1/240f;
+        }
     }
 
     private void drawElements(){
