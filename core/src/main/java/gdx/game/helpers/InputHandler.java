@@ -26,11 +26,8 @@ public class InputHandler implements InputProcessor {
         this.screen = screen;
         player = screen.getPlayer();
         stage = screen.getStage();
-    }
-
-    public void updatePlayerBody(Body body){
-        this.playerBody = body;
-        playerposition = playerBody.getPosition();
+        this.playerBody = player.getBody();
+        this.playerposition = playerBody.getPosition();
     }
 
     @Override

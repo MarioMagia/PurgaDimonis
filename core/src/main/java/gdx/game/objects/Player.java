@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
@@ -36,6 +37,9 @@ public class Player extends Actor {
 
     private BodyDef bodyDef;
     private FixtureDef fixtureDef;
+    private Body body;
+    private boolean isJumping;
+
     public Player(float x, float y, float scale) {
         this.width = Math.round(Settings.PLAYER_WIDTH*scale);
         this.height = Math.round(Settings.PLAYER_HEIGHT*scale);
@@ -57,6 +61,7 @@ public class Player extends Actor {
         fixtureDef.density = 1;
         fixtureDef.friction = 0;
         fixtureDef.restitution = 0;
+        isJumping = false;
     }
 
     @Override
@@ -65,22 +70,70 @@ public class Player extends Actor {
 
         collisionRect.set(position.x, position.y, width, 64);
         setBounds(position.x, position.y, width, height);
+        float velocityY = body.getLinearVelocity().y;
+
+        // Determine player state
+        if (velocityY > 1) {
+            playerState = PlayerState.JUMPING;
+        } else if (velocityY < -1) {
+            if (playerState == PlayerState.JUMP_FALL_TRANSITION) {
+                // If still in transition state, wait for a delay before transitioning to falling
+
+                timeSinceTransition += Gdx.graphics.getDeltaTime();
+                if (timeSinceTransition >= jumpFallTransitionDelay) {
+                    Gdx.app.log("fallin", "fallin");
+                    playerState = PlayerState.FALLING;
+                    timeSinceTransition = 0; // Reset the timeSinceTransition
+                }
+            } else if(playerState == PlayerState.JUMPING) {
+                playerState = PlayerState.JUMP_FALL_TRANSITION;
+                stateTime = 0;
+                timeSinceTransition = 0; // Reset the timeSinceTransition
+            }
+        } else {
+            playerState = PlayerState.RUNNING;
+        }
     }
+
+    // Define player states
+    enum PlayerState {
+        RUNNING,
+        JUMPING,
+        FALLING,
+        JUMP_FALL_TRANSITION
+    }
+
+    // Initialize player state
+    PlayerState playerState = PlayerState.RUNNING;
+    float jumpFallTransitionDelay = 0.07f; // Adjust as needed
+    float timeSinceTransition = 0;
 
     @Override
     public void draw(Batch batch, float parentAlpha) {
         super.draw(batch, parentAlpha);
         stateTime += Gdx.graphics.getDeltaTime();
-        batch.draw((TextureRegion)AssetManager.running.getKeyFrame(stateTime, true), position.x-(Settings.PLAYER_CANVAS_WIDTH*scale/2) + (width/2), position.y,
-            Settings.PLAYER_CANVAS_WIDTH*scale, Settings.PLAYER_CANVAS_HEIGHT*scale);
-        /*ShapeRenderer sr = new ShapeRenderer();
-        sr.setProjectionMatrix(batch.getProjectionMatrix());
-        sr.begin(ShapeRenderer.ShapeType.Line);
-        sr.setColor(Color.GREEN);
-        sr.rect(position.x-(Settings.PLAYER_CANVAS_WIDTH*scale/2) + (width/2),position.y,Settings.PLAYER_CANVAS_WIDTH*scale,Settings.PLAYER_CANVAS_HEIGHT*scale);
-        sr.end();*/
-    }
+        Gdx.app.log("vel", body.getLinearVelocity()+"");
 
+        // Draw based on player state
+        switch (playerState) {
+            case RUNNING:
+                batch.draw((TextureRegion) AssetManager.running.getKeyFrame(stateTime, true), position.x - (Settings.PLAYER_CANVAS_WIDTH * scale / 2) + (width / 2), position.y,
+                    Settings.PLAYER_CANVAS_WIDTH * scale, Settings.PLAYER_CANVAS_HEIGHT * scale);
+                break;
+            case JUMPING:
+                batch.draw((TextureRegion) AssetManager.jump.getKeyFrame(stateTime, true), position.x - (Settings.PLAYER_CANVAS_WIDTH * scale / 2) + (width / 2), position.y,
+                    Settings.PLAYER_CANVAS_WIDTH * scale, Settings.PLAYER_CANVAS_HEIGHT * scale);
+                break;
+            case FALLING:
+                batch.draw((TextureRegion) AssetManager.fall.getKeyFrame(stateTime, true), position.x - (Settings.PLAYER_CANVAS_WIDTH * scale / 2) + (width / 2), position.y,
+                    Settings.PLAYER_CANVAS_WIDTH * scale, Settings.PLAYER_CANVAS_HEIGHT * scale);
+                break;
+            case JUMP_FALL_TRANSITION:
+                batch.draw((TextureRegion) AssetManager.jumpFallInBetween.getKeyFrame(stateTime, true), position.x - (Settings.PLAYER_CANVAS_WIDTH * scale / 2) + (width / 2), position.y,
+                    Settings.PLAYER_CANVAS_WIDTH * scale, Settings.PLAYER_CANVAS_HEIGHT * scale);
+                break;
+        }
+    }
 
     public Rectangle getCollisionRect() {
         return collisionRect;
@@ -109,6 +162,14 @@ public class Player extends Actor {
             this.position.x = position.x - (width/2);
             this.position.y = position.y - (height/2);
         }
+    }
+
+    public Body getBody() {
+        return body;
+    }
+
+    public void setBody(Body body) {
+        this.body = body;
     }
 }
 

@@ -49,10 +49,9 @@ public class GameScreen implements Screen {
         stage.addActor(sh);
         player = new Player( Settings.PLAYER_STARTX,Settings.PLAYER_STARTY+200,4);
         stage.addActor(player);
+        createWorld();
         inputHandler = new InputHandler(this);
         Gdx.input.setInputProcessor(inputHandler);
-        createWorld();
-
     }
 
     private void createWorld() {
@@ -79,7 +78,7 @@ public class GameScreen implements Screen {
         playerbody = world.createBody(player.getBodyDef());
         // Create our fixture and attach it to the body
         Fixture fixture = playerbody.createFixture(player.getFixtureDef());
-        inputHandler.updatePlayerBody(playerbody);
+        player.setBody(playerbody);
     }
 
     @Override
