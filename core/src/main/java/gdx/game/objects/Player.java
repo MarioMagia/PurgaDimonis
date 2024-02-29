@@ -66,7 +66,7 @@ public class Player extends Actor {
     public void act(float delta) {
         super.act(delta);
 
-        collisionRect.set(position.x, position.y, width, 64);
+        collisionRect.set(position.x, position.y, width, height);
         setBounds(position.x, position.y, width, height);
         float velocityY = body.getLinearVelocity().y;
 

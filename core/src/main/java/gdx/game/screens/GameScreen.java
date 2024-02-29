@@ -28,11 +28,13 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import gdx.game.helpers.AssetManager;
 import gdx.game.helpers.InputHandler;
+import gdx.game.objects.Enemy;
 import gdx.game.objects.Player;
 import gdx.game.objects.ScrollHandler;
 import gdx.game.utils.Settings;
@@ -50,6 +52,7 @@ public class GameScreen implements Screen {
     private InputHandler inputHandler;
     private Skin skin;
     private Table root;
+    private Array<Enemy> enemies;
     public GameScreen(){
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         Box2D.init();
@@ -88,6 +91,10 @@ public class GameScreen implements Screen {
                 player.attack();
             }
         });
+        enemies = new Array<>();
+        Enemy enemy = new Enemy(800,100,3, Settings.BG_SPEED);
+        enemies.add(enemy);
+        stage.addActor(enemy);
     }
 
     private void createWorld() {
@@ -153,6 +160,10 @@ public class GameScreen implements Screen {
         shapeRenderer.setColor(Color.RED);
         shapeRenderer.rect(player.getX(),player.getY(),player.getWidth(),player.getHeight());
         Rectangle attackCollisionRect = player.getAttackCollisionRect();
+        for(int i = 0; i<enemies.size; i++){
+            Enemy enemy = enemies.get(i);
+            shapeRenderer.rect(enemy.getX(),enemy.getY(),enemy.getWidth(),enemy.getHeight());
+        }
         if(attackCollisionRect != null){
             shapeRenderer.setColor(Color.YELLOW);
             shapeRenderer.rect(attackCollisionRect.x,attackCollisionRect.y,attackCollisionRect.width,attackCollisionRect.height);

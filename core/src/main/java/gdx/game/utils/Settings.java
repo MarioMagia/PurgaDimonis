@@ -7,6 +7,9 @@ public class Settings {
     public static final int GAME_HEIGHT = 720;
     public static final int PLAYER_WIDTH = 20;
     public static final int PLAYER_HEIGHT = 38;
+    public static final int SKELETON_WIDTH = 45;
+    public static final int SKELETON_HEIGHT = 51;
+    public static final int MONSTER_CANVAS_SIZE = 150;
     public static final int PLAYER_CANVAS_WIDTH = 120;
     public static final int PLAYER_CANVAS_HEIGHT = 80;
     public static final float PLAYER_STARTX = GAME_WIDTH*( 0.25f) - PLAYER_WIDTH / 2;
