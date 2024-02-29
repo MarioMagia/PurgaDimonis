@@ -51,6 +51,7 @@ public class InputHandler implements InputProcessor {
         Gdx.app.log("button", button+"");
         if(playerBody.getLinearVelocity().y<1 && playerBody.getLinearVelocity().y>-1){
             playerBody.applyLinearImpulse(new Vector2(0,10000000), new Vector2(playerposition.x+40,playerposition.y),false);
+            player.setAttackCollisionRect(null);
         }
 
         return false;

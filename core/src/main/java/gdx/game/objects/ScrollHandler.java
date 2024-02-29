@@ -28,4 +28,20 @@ public class ScrollHandler extends Group {
         addActor(bg);
         addActor(bg_back);
     }
+
+    public Background getBg() {
+        return bg;
+    }
+
+    public void setBg(Background bg) {
+        this.bg = bg;
+    }
+
+    public Background getBg_back() {
+        return bg_back;
+    }
+
+    public void setBg_back(Background bg_back) {
+        this.bg_back = bg_back;
+    }
 }

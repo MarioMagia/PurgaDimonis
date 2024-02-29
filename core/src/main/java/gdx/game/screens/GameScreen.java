@@ -1,35 +1,31 @@
 package gdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
 import com.badlogic.gdx.physics.box2d.Box2D;
 import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
-import com.badlogic.gdx.physics.box2d.CircleShape;
 import com.badlogic.gdx.physics.box2d.Fixture;
-import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Button;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
-import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
-import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
 import gdx.game.helpers.AssetManager;
@@ -53,6 +49,8 @@ public class GameScreen implements Screen {
     private Skin skin;
     private Table root;
     private Array<Enemy> enemies;
+    private long lastEnemyTime;
+    private long nextEnemyTime;
     public GameScreen(){
         skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         Box2D.init();
@@ -64,7 +62,7 @@ public class GameScreen implements Screen {
         batch = stage.getBatch();
         sh = new ScrollHandler();
         stage.addActor(sh);
-        player = new Player( Settings.PLAYER_STARTX,Settings.PLAYER_STARTY+200,4);
+        player = new Player( Settings.PLAYER_STARTX,Settings.PLAYER_STARTY,4);
         stage.addActor(player);
         createWorld();
 
@@ -92,9 +90,10 @@ public class GameScreen implements Screen {
             }
         });
         enemies = new Array<>();
-        Enemy enemy = new Enemy(800,100,3, Settings.BG_SPEED);
-        enemies.add(enemy);
-        stage.addActor(enemy);
+        Enemy enemy = new Enemy(Settings.GAME_WIDTH+100,100,3, Settings.BG_SPEED);
+        nextEnemyTime = MathUtils.random(Settings.ENEMY_MIN_COUNTER,Settings.ENEMY_MAX_COUNTER);
+        player.setZIndex(1);
+        button.setZIndex(3);
     }
 
     private void createWorld() {
@@ -137,7 +136,25 @@ public class GameScreen implements Screen {
         doPhysicsStep(delta);
         Vector2 position = playerbody.getPosition();
         player.setPosition(position,true);
-        drawElements();
+        for(int i = 0; i<enemies.size; i++){
+            Gdx.app.log("enemy", i+"");
+            if(player.attackCollides(enemies.get(i))){
+                enemies.get(i).hurt();
+                Gdx.app.log("colision","colision detected");
+            }else if(enemies.get(i).isOutOfScreen()){
+                enemies.get(i).remove();
+                enemies.removeIndex(i);
+            }
+        }
+        for(int i = 0; i<enemies.size; i++) {
+            if (enemies.get(i).collides(player)) {
+                player.hurt();
+                enemies.get(i).attack();
+            }
+        }
+        if(TimeUtils.nanoTime() - lastEnemyTime > nextEnemyTime) spawnEnemy();
+        //drawElements();
+
     }
     private float accumulator = 0;
 
@@ -150,6 +167,15 @@ public class GameScreen implements Screen {
             world.step(1/240f, 60, 2);
             accumulator -= 1/240f;
         }
+    }
+
+    private void spawnEnemy() {
+        Enemy enemy = new Enemy(Settings.GAME_WIDTH+100,100,3, Settings.BG_SPEED);
+        enemies.add(enemy);
+        stage.addActor(enemy);
+        enemy.setZIndex(2);
+        lastEnemyTime = TimeUtils.nanoTime();
+        nextEnemyTime = MathUtils.random(Settings.ENEMY_MIN_COUNTER,Settings.ENEMY_MAX_COUNTER);
     }
 
     private void drawElements(){
@@ -174,7 +200,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void resize(int width, int height) {
-
+        stage.getViewport().update(width, height);
     }
 
     @Override

@@ -3,6 +3,7 @@ package gdx.game.objects;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
@@ -95,7 +96,7 @@ public class Player extends Actor {
                 if(attackAgain){
                     attackCollisionRect = new Rectangle();
                     attackCollisionRect.setPosition(position.x+width, position.y);
-                    attackCollisionRect.setSize(width*2, height);
+                    attackCollisionRect.setSize(width*1.5f, height);
                 }
                 stateTime = 0;
                 timeSinceTransition = 0;
@@ -108,6 +109,12 @@ public class Player extends Actor {
                 timeSinceTransition = 0;
                 attackAgain = false;
             }
+        } else if (playerState == PlayerState.HIT) {
+            timeSinceTransition += Gdx.graphics.getDeltaTime();
+            if(timeSinceTransition >= hitTransitionDelay){
+                timeSinceTransition = 0;
+                playerState = PlayerState.RUNNING;
+            }
         } else {
             playerState = PlayerState.RUNNING;
         }
@@ -115,17 +122,23 @@ public class Player extends Actor {
 
     public void attack() {
         if(body.getLinearVelocity().y <1 && body.getLinearVelocity().y >-1 && playerState != PlayerState.JUMP_FALL_TRANSITION){
-            if(playerState != PlayerState.ATTACK && playerState != PlayerState.ATTACK2){
+            if(playerState != PlayerState.ATTACK && playerState != PlayerState.ATTACK2
+                && playerState != PlayerState.HIT){
                 playerState = PlayerState.ATTACK;
                 stateTime = 0;
                 attackCollisionRect = new Rectangle();
                 attackCollisionRect.setPosition(position.x+width, position.y);
-                attackCollisionRect.setSize(width*2.5f, height);
+                attackCollisionRect.setSize(width*2f, height);
             }else if(playerState == PlayerState.ATTACK){
                 attackAgain = true;
             }
 
         }
+
+    }
+
+    public void hurt() {
+        playerState = PlayerState.HIT;
 
     }
 
@@ -136,7 +149,8 @@ public class Player extends Actor {
         FALLING,
         JUMP_FALL_TRANSITION,
         ATTACK,
-        ATTACK2
+        ATTACK2,
+        HIT
     }
 
     // Initialize player state
@@ -144,6 +158,7 @@ public class Player extends Actor {
     float jumpFallTransitionDelay = 0.07f; // Adjust as needed
     float attackTransitionDelay = 0.07f*3;
     float attack2TransitionDelay = 0.07f*5;
+    float hitTransitionDelay = 0.28f;
     float timeSinceTransition = 0;
 
     @Override
@@ -178,6 +193,10 @@ public class Player extends Actor {
                 batch.draw((TextureRegion) AssetManager.attack2.getKeyFrame(stateTime,true),position.x - (Settings.PLAYER_CANVAS_WIDTH * scale / 2) + (width / 2), position.y,
                     Settings.PLAYER_CANVAS_WIDTH * scale, Settings.PLAYER_CANVAS_HEIGHT * scale);
                 break;
+            case HIT:
+                batch.draw(AssetManager.hit,position.x - (Settings.PLAYER_CANVAS_WIDTH * scale / 2) + (width / 2), position.y,
+                    Settings.PLAYER_CANVAS_WIDTH * scale, Settings.PLAYER_CANVAS_HEIGHT * scale);
+                break;
         }
     }
 
@@ -187,6 +206,10 @@ public class Player extends Actor {
 
     public Rectangle getAttackCollisionRect() {
         return attackCollisionRect;
+    }
+
+    public void setAttackCollisionRect(Rectangle attackCollisionRect) {
+        this.attackCollisionRect = attackCollisionRect;
     }
 
     public BodyDef getBodyDef() {
@@ -211,6 +234,13 @@ public class Player extends Actor {
             this.position.x = position.x - (width/2);
             this.position.y = position.y - (height/2);
         }
+    }
+
+    public boolean attackCollides(Enemy enemy){
+        if(attackCollisionRect != null && enemy.getCollisionRect() != null){
+            return (Intersector.overlaps(attackCollisionRect, enemy.getCollisionRect()));
+        }
+        return false;
     }
 
     public Body getBody() {

@@ -48,4 +48,12 @@ public class Background extends Actor {
             leftOfScreen = true;
         }
     }
+
+    public float getVelocity() {
+        return velocity;
+    }
+
+    public void setVelocity(float velocity) {
+        this.velocity = velocity;
+    }
 }
