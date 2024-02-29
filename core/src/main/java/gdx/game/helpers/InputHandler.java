@@ -48,6 +48,7 @@ public class InputHandler implements InputProcessor {
     @Override
     public boolean touchDown(int screenX, int screenY, int pointer, int button) {
 
+        Gdx.app.log("button", button+"");
         if(playerBody.getLinearVelocity().y<1 && playerBody.getLinearVelocity().y>-1){
             playerBody.applyLinearImpulse(new Vector2(0,10000000), new Vector2(playerposition.x+40,playerposition.y),false);
         }
@@ -66,14 +67,7 @@ public class InputHandler implements InputProcessor {
 
     @Override
     public boolean touchDragged(int screenX, int screenY, int pointer) {
-        if (Math.abs(previousX - screenX) > 2)
-            if (previousX < screenX) {
-                Gdx.app.log("Right", player.getName());
-            } else {
-                Gdx.app.log("Left", player.getName());
-            }
-        previousX = screenX;
-        return true;
+        return false;
     }
 
     @Override

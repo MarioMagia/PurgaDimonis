@@ -14,4 +14,10 @@ public class MyGame extends Game {
         screenManager = new ScreenManager();
         screenManager.initialize(this);
     }
+
+    @Override
+    public void dispose() {
+        super.dispose();
+        AssetManager.dispose();
+    }
 }

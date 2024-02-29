@@ -9,7 +9,7 @@ public class AssetManager {
 
     public static Texture background;
 
-    public static Animation running, jump, jumpFallInBetween, fall;
+    public static Animation running, jump, jumpFallInBetween, fall, attack, attack2;
 
     public static void load(){
 
@@ -22,12 +22,20 @@ public class AssetManager {
         jump.setPlayMode(Animation.PlayMode.NORMAL);
 
         //jumpFallInBetween
-        jumpFallInBetween = makeAnimation(new Texture(Gdx.files.internal("player/120x80_PNGSheets/_JumpFallInBetween.png")),2, 0.7f);
+        jumpFallInBetween = makeAnimation(new Texture(Gdx.files.internal("player/120x80_PNGSheets/_JumpFallInbetween.png")),2, 0.07f);
         jumpFallInBetween.setPlayMode(Animation.PlayMode.NORMAL);
 
         //fall
         fall = makeAnimation(new Texture(Gdx.files.internal("player/120x80_PNGSheets/_Fall.png")),3, 0.07f);
         fall.setPlayMode(Animation.PlayMode.NORMAL);
+
+        //attack
+        attack = makeAnimation(new Texture(Gdx.files.internal("player/120x80_PNGSheets/_Attack.png")),4,0.07f);
+        attack.setPlayMode(Animation.PlayMode.NORMAL);
+
+        //attack2
+        attack2 = makeAnimation(new Texture(Gdx.files.internal("player/120x80_PNGSheets/_Attack2.png")),6,0.07f);
+        attack2.setPlayMode(Animation.PlayMode.NORMAL);
 
         background = new Texture(Gdx.files.internal("backgrounds/background_repeat.png"));
     }
@@ -43,5 +51,24 @@ public class AssetManager {
 
     public static void dispose(){
         background.dispose();
+
+        // Dispose textures used in animations
+        disposeAnimationTextures(running);
+        disposeAnimationTextures(jump);
+        disposeAnimationTextures(jumpFallInBetween);
+        disposeAnimationTextures(fall);
+        disposeAnimationTextures(attack);
+        disposeAnimationTextures(attack2);
+    }
+
+    private static void disposeAnimationTextures(Animation<TextureRegion> animation) {
+        if (animation != null) {
+            TextureRegion[] keyFrames = animation.getKeyFrames();
+            for (TextureRegion textureRegion : keyFrames) {
+                if (textureRegion.getTexture() != null) {
+                    textureRegion.getTexture().dispose();
+                }
+            }
+        }
     }
 }

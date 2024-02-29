@@ -2,11 +2,13 @@ package gdx.game.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
 import com.badlogic.gdx.physics.box2d.BodyDef;
@@ -17,10 +19,19 @@ import com.badlogic.gdx.physics.box2d.Fixture;
 import com.badlogic.gdx.physics.box2d.FixtureDef;
 import com.badlogic.gdx.physics.box2d.PolygonShape;
 import com.badlogic.gdx.physics.box2d.World;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Button;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
+import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
+import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 
+import gdx.game.helpers.AssetManager;
 import gdx.game.helpers.InputHandler;
 import gdx.game.objects.Player;
 import gdx.game.objects.ScrollHandler;
@@ -37,7 +48,10 @@ public class GameScreen implements Screen {
     private ShapeRenderer shapeRenderer;
     private Batch batch;
     private InputHandler inputHandler;
+    private Skin skin;
+    private Table root;
     public GameScreen(){
+        skin = new Skin(Gdx.files.internal("ui/uiskin.json"));
         Box2D.init();
         camera = new OrthographicCamera(Settings.GAME_WIDTH, Settings.GAME_HEIGHT);
         camera.setToOrtho(false, Settings.GAME_WIDTH,Settings.GAME_HEIGHT);
@@ -50,8 +64,30 @@ public class GameScreen implements Screen {
         player = new Player( Settings.PLAYER_STARTX,Settings.PLAYER_STARTY+200,4);
         stage.addActor(player);
         createWorld();
+
+        //set the input processors
         inputHandler = new InputHandler(this);
-        Gdx.input.setInputProcessor(inputHandler);
+        InputMultiplexer multiplexer = new InputMultiplexer();
+        multiplexer.addProcessor(stage);
+        multiplexer.addProcessor(inputHandler);
+        Gdx.input.setInputProcessor(multiplexer);
+
+        root = new Table();
+        root.setFillParent(true);
+        stage.addActor(root);
+
+        // Set the table's alignment to bottom-left
+        root.bottom().left();
+
+        Button button = new Button(skin, "arcade");
+        root.add(button).pad(60);
+
+        button.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                player.attack();
+            }
+        });
     }
 
     private void createWorld() {
@@ -94,7 +130,7 @@ public class GameScreen implements Screen {
         doPhysicsStep(delta);
         Vector2 position = playerbody.getPosition();
         player.setPosition(position,true);
-        //drawElements();
+        drawElements();
     }
     private float accumulator = 0;
 
@@ -110,11 +146,18 @@ public class GameScreen implements Screen {
     }
 
     private void drawElements(){
+        root.setDebug(true);
         debugRenderer.render(world, camera.combined);
         shapeRenderer.setProjectionMatrix(batch.getProjectionMatrix());
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
         shapeRenderer.setColor(Color.RED);
         shapeRenderer.rect(player.getX(),player.getY(),player.getWidth(),player.getHeight());
+        Rectangle attackCollisionRect = player.getAttackCollisionRect();
+        if(attackCollisionRect != null){
+            shapeRenderer.setColor(Color.YELLOW);
+            shapeRenderer.rect(attackCollisionRect.x,attackCollisionRect.y,attackCollisionRect.width,attackCollisionRect.height);
+        }
+
         shapeRenderer.end();
     }
 
@@ -140,7 +183,7 @@ public class GameScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        AssetManager.dispose();
     }
 
     public Player getPlayer() {
