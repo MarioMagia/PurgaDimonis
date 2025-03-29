@@ -1,128 +1,98 @@
 package gdx.game.screens;
+
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.scenes.scene2d.EventListener;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
-import com.badlogic.gdx.scenes.scene2d.ui.Window;
-import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 
-/** First screen of the application. Displayed after the application is created. */
 public class TestScreen implements Screen {
+    private TextureAtlas atlas = new TextureAtlas("ui/uiskin.atlas");
 
-    private SpriteBatch batch;
+    private SpriteBatch batch = new SpriteBatch();
+
+    private OrthographicCamera camera = new OrthographicCamera();
+
+    protected Skin skin = new Skin(Gdx.files.internal("ui/uiskin.json"), this.atlas);
+
     protected Stage stage;
+
     private Viewport viewport;
-    private OrthographicCamera camera;
-    private TextureAtlas atlas;
-    protected Skin skin;
 
-    public TestScreen()
-    {
-        atlas = new TextureAtlas("ui/uiskin.atlas");
-        skin = new Skin(Gdx.files.internal("ui/uiskin.json"), atlas);
-
-        batch = new SpriteBatch();
-        camera = new OrthographicCamera();
-        viewport = new FitViewport(480, 480, camera);
-        viewport.apply();
-
-        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
-        camera.update();
-
-        stage = new Stage(viewport, batch);
+    public TestScreen() {
+        FitViewport fitViewport = new FitViewport(480.0F, 480.0F, (Camera)this.camera);
+        this.viewport = (Viewport)fitViewport;
+        fitViewport.apply();
+        this.camera.position.set(this.camera.viewportWidth / 2.0F, this.camera.viewportHeight / 2.0F, 0.0F);
+        this.camera.update();
+        this.stage = new Stage(this.viewport, (Batch)this.batch);
     }
 
+    public void dispose() {
+        this.skin.dispose();
+        this.atlas.dispose();
+    }
 
-    @Override
+    public void hide() {}
+
+    public void pause() {}
+
+    public void render(float paramFloat) {
+        Gdx.gl.glClearColor(0.1F, 0.12F, 0.16F, 1.0F);
+        Gdx.gl.glClear(16384);
+        this.stage.act();
+        this.stage.draw();
+    }
+
+    public void resize(int paramInt1, int paramInt2) {
+        this.viewport.update(paramInt1, paramInt2);
+        this.camera.position.set(this.camera.viewportWidth / 2.0F, this.camera.viewportHeight / 2.0F, 0.0F);
+        this.camera.update();
+    }
+
+    public void resume() {}
+
     public void show() {
-        //Stage should controll input:
-        Gdx.input.setInputProcessor(stage);
-
-        //Create Table
-        Table mainTable = new Table();
-        //Set table to fill stage
-        mainTable.setFillParent(true);
-        //Set alignment of contents in the table.
-        mainTable.top();
-
-        //Create buttons
-        TextButton playButton = new TextButton("Play", skin);
-        TextButton optionsButton = new TextButton("Options", skin);
-        TextButton exitButton = new TextButton("Exit", skin);
-
-        //Add listeners to buttons
-        playButton.addListener(new ClickListener(){
+        Gdx.input.setInputProcessor((InputProcessor)this.stage);
+        Table table = new Table();
+        table.setFillParent(true);
+        table.top();
+        TextButton textButton3 = new TextButton("Play", this.skin);
+        TextButton textButton1 = new TextButton("Options", this.skin);
+        TextButton textButton2 = new TextButton("Exit", this.skin);
+        textButton3.addListener((EventListener)new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+
+            public void clicked(InputEvent param1InputEvent, float param1Float1, float param1Float2) {
                 ((Game)Gdx.app.getApplicationListener()).setScreen(new FirstScreen());
             }
         });
-        exitButton.addListener(new ClickListener(){
+        textButton2.addListener((EventListener)new ClickListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
+
+            public void clicked(InputEvent param1InputEvent, float param1Float1, float param1Float2) {
                 Gdx.app.exit();
             }
         });
-
-        //Add buttons to table
-        mainTable.add(playButton);
-        mainTable.row();
-        mainTable.add(optionsButton);
-        mainTable.row();
-        mainTable.add(exitButton);
-
-        //Add table to stage
-        stage.addActor(mainTable);
-    }
-
-    @Override
-    public void render(float delta) {
-        Gdx.gl.glClearColor(.1f, .12f, .16f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-
-        stage.act();
-        stage.draw();
-    }
-
-    @Override
-    public void resize(int width, int height) {
-        viewport.update(width, height);
-        camera.position.set(camera.viewportWidth / 2, camera.viewportHeight / 2, 0);
-        camera.update();
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
-    }
-
-    @Override
-    public void dispose() {
-        skin.dispose();
-        atlas.dispose();
+        table.add((Actor)textButton3);
+        table.row();
+        table.add((Actor)textButton1);
+        table.row();
+        table.add((Actor)textButton2);
+        this.stage.addActor((Actor)table);
     }
 }

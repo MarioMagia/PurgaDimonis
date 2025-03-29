@@ -1,20 +1,21 @@
 package gdx.game;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Screen;
-
 import gdx.game.screens.FirstScreen;
 
 public class ScreenManager {
+    private static MyGame game;
 
-    private static Game game;
-
-    public void initialize(Game game){
-        this.game = game;
-        game.setScreen(new FirstScreen());
+    public static MyGame getGame() {
+        return game;
     }
 
-    public static void setScreen(Screen screen){
-        game.setScreen(screen);
+    public static void setScreen(Screen paramScreen) {
+        game.setScreen(paramScreen);
+    }
+
+    public void initialize(MyGame paramMyGame) {
+        game = paramMyGame;
+        paramMyGame.setScreen((Screen)new FirstScreen());
     }
 }

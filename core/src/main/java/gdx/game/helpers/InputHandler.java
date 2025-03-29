@@ -1,83 +1,73 @@
 package gdx.game.helpers;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputProcessor;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.Body;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-
 import gdx.game.objects.Player;
 import gdx.game.screens.GameScreen;
-import gdx.game.utils.Settings;
 
 public class InputHandler implements InputProcessor {
-
     private Player player;
-    private GameScreen screen;
+
     private Body playerBody;
+
     private Vector2 playerposition;
-    private Stage stage;
+
     int previousX = 0;
 
-    public InputHandler(GameScreen screen) {
+    private GameScreen screen;
 
-        // Obtenim tots els elements necessaris
-        this.screen = screen;
-        player = screen.getPlayer();
-        stage = screen.getStage();
-        this.playerBody = player.getBody();
-        this.playerposition = playerBody.getPosition();
+    private Stage stage;
+
+    public InputHandler(GameScreen paramGameScreen) {
+        this.screen = paramGameScreen;
+        this.player = paramGameScreen.getPlayer();
+        this.stage = paramGameScreen.getStage();
+        Body body = this.player.getBody();
+        this.playerBody = body;
+        this.playerposition = body.getPosition();
     }
 
-    @Override
-    public boolean keyDown(int keycode) {
+    public boolean keyDown(int paramInt) {
         return false;
     }
 
-    @Override
-    public boolean keyUp(int keycode) {
+    public boolean keyTyped(char paramChar) {
         return false;
     }
 
-    @Override
-    public boolean keyTyped(char character) {
+    public boolean keyUp(int paramInt) {
         return false;
     }
 
-    @Override
-    public boolean touchDown(int screenX, int screenY, int pointer, int button) {
+    public boolean mouseMoved(int paramInt1, int paramInt2) {
+        return false;
+    }
 
-        Gdx.app.log("button", button+"");
-        if(playerBody.getLinearVelocity().y<1 && playerBody.getLinearVelocity().y>-1){
-            playerBody.applyLinearImpulse(new Vector2(0,10000000), new Vector2(playerposition.x+40,playerposition.y),false);
-            player.setAttackCollisionRect(null);
+    public boolean scrolled(float paramFloat1, float paramFloat2) {
+        return false;
+    }
+
+    public boolean touchCancelled(int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
+        return false;
+    }
+
+    public boolean touchDown(int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
+        if (!this.screen.isGameover() && !this.player.isJumping()) {
+            this.playerBody.applyLinearImpulse(new Vector2(0.0F, 1.0E7F), new Vector2(this.playerposition.x + 40.0F, this.playerposition.y), false);
+            AssetManager.jumpingSound.play(AssetManager.soundVolume);
+            this.player.setJumping(true);
+            this.player.setAttackCollisionRect(null);
         }
-
         return false;
     }
-    @Override
-    public boolean touchUp(int screenX, int screenY, int pointer, int button) {
+
+    public boolean touchDragged(int paramInt1, int paramInt2, int paramInt3) {
+        return false;
+    }
+
+    public boolean touchUp(int paramInt1, int paramInt2, int paramInt3, int paramInt4) {
         return true;
-    }
-
-    @Override
-    public boolean touchCancelled(int screenX, int screenY, int pointer, int button) {
-        return false;
-    }
-
-    @Override
-    public boolean touchDragged(int screenX, int screenY, int pointer) {
-        return false;
-    }
-
-    @Override
-    public boolean mouseMoved(int screenX, int screenY) {
-        return false;
-    }
-
-    @Override
-    public boolean scrolled(float amountX, float amountY) {
-        return false;
     }
 }

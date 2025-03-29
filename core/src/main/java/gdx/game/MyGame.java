@@ -1,23 +1,28 @@
 package gdx.game;
 
 import com.badlogic.gdx.Game;
-
 import gdx.game.helpers.AssetManager;
-import gdx.game.screens.FirstScreen;
+import gdx.game.utils.GamePreferences;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class MyGame extends Game {
+    private GamePreferences preferences;
+
     ScreenManager screenManager;
-    @Override
+
     public void create() {
-        AssetManager.load();
-        screenManager = new ScreenManager();
+        this.preferences = new GamePreferences();
+        AssetManager.load(this);
+        ScreenManager screenManager = new ScreenManager();
+        this.screenManager = screenManager;
         screenManager.initialize(this);
     }
 
-    @Override
     public void dispose() {
         super.dispose();
         AssetManager.dispose();
+    }
+
+    public GamePreferences getPreferences() {
+        return this.preferences;
     }
 }

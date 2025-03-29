@@ -8,11 +8,13 @@ import gdx.game.MyGame;
 
 /** Launches the Android application. */
 public class AndroidLauncher extends AndroidApplication {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    /* access modifiers changed from: protected */
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         AndroidApplicationConfiguration configuration = new AndroidApplicationConfiguration();
-        configuration.useImmersiveMode = true; // Recommended, but not required.
+        configuration.useImmersiveMode = true;
+        configuration.useAccelerometer = false;
+        configuration.useCompass = false;
         initialize(new MyGame(), configuration);
     }
 }

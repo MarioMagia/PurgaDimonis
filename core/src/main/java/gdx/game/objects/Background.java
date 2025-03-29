@@ -1,59 +1,62 @@
 package gdx.game.objects;
 
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 
-import gdx.game.helpers.AssetManager;
-
 public class Background extends Actor {
-    private boolean leftOfScreen;
-    private Vector2 position;
-    private float velocity;
-    private float width;
     private float height;
 
-    public Background(float x, float y, float width, float height, float speed){
-        position = new Vector2(x,y);
-        this.width = width;
-        this.velocity = speed;
-        this.height = height;
-        leftOfScreen = false;
+    private boolean leftOfScreen;
+
+    private Vector2 position;
+
+    private final Texture texture;
+
+    private float velocity;
+
+    private float width;
+
+    public Background(float paramFloat1, float paramFloat2, float paramFloat3, float paramFloat4, float paramFloat5, Texture paramTexture) {
+        this.position = new Vector2(paramFloat1, paramFloat2);
+        this.width = paramFloat3;
+        this.velocity = paramFloat5;
+        this.height = paramFloat4;
+        this.leftOfScreen = false;
+        this.texture = paramTexture;
     }
 
-    @Override
-    public void draw(Batch batch, float parentAlpha) {
-        super.draw(batch, parentAlpha);
-        batch.disableBlending();
-        batch.draw(AssetManager.background, position.x, position.y, width, height);
-        batch.enableBlending();
+    public void act(float paramFloat) {
+        Vector2 vector2 = this.position;
+        vector2.x += this.velocity * paramFloat;
+        if (this.position.x + this.width < 0.0F)
+            this.leftOfScreen = true;
     }
 
-    public boolean isLeftOfScreen() {
-        return leftOfScreen;
+    public void draw(Batch paramBatch, float paramFloat) {
+        super.draw(paramBatch, paramFloat);
+        paramBatch.draw(this.texture, this.position.x, this.position.y, this.width, this.height);
     }
 
     public float getTailX() {
-        return position.x + width;
-    }
-
-    public void reset(float tailX) {
-        position.x = tailX;
-        leftOfScreen = false;
-    }
-
-    public void act(float delta){
-        position.x += velocity*delta;
-        if(position.x + width < 0){
-            leftOfScreen = true;
-        }
+        return this.position.x + this.width;
     }
 
     public float getVelocity() {
-        return velocity;
+        return this.velocity;
     }
 
-    public void setVelocity(float velocity) {
-        this.velocity = velocity;
+    public boolean isLeftOfScreen() {
+        return this.leftOfScreen;
+    }
+
+    public void reset(float paramFloat) {
+        this.position.x = paramFloat;
+        this.leftOfScreen = false;
+    }
+
+    public void setVelocity(float paramFloat) {
+        this.velocity = paramFloat;
     }
 }
