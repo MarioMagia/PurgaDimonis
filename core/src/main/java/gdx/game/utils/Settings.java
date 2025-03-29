@@ -70,4 +70,6 @@ public class Settings {
     public static final float WORM_SHOOT_DELAY = 4.0F;
 
     public static final float WORM_WIDTH = 51.0F;
+
+    public static final boolean DEBUG_MODE = false;
 }

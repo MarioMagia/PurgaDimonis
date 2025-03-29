@@ -201,6 +201,7 @@ public class GameScreen implements Screen {
             this.scoreLabel.setColor(Color.YELLOW);
         }
         playerAttack();
+        if(Settings.DEBUG_MODE) drawElements();
     }
 
     private void playerAttack() {
